@@ -102,11 +102,22 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Apply pending EF Core migrations
+// Initialize the database for the selected provider
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+
+    if (string.Equals(
+        builder.Configuration["DATABASE_PROVIDER"],
+        "Postgres",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        db.Database.EnsureCreated();
+    }
+    else
+    {
+        db.Database.Migrate();
+    }
 }
 
 app.MapControllers();
