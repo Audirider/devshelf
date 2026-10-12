@@ -11,13 +11,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-//Add Ef core plus SQLite
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=devshelf.db";
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
 
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<AuthService>();
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=devshelf.db";
+
+var databaseProvider = builder.Configuration["DATABASE_PROVIDER"];
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    if (string.Equals(databaseProvider, "Postgres",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
+});
+
 
 //Read JWT configuration 
 var jwtKey = builder.Configuration["Jwt:Key"];
