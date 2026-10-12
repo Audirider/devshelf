@@ -30,7 +30,8 @@ if (string.IsNullOrEmpty(jwtKey))
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer(options => {
+    .AddJwtBearer(options =>
+    {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -79,10 +80,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Apply pending EF Core migrations
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 app.MapControllers();
 
 app.Run();
+
 
