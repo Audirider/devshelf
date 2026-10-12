@@ -32,3 +32,6 @@ dist-ssr/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Ignore local development configuration
+server/appsettings.Development.json
